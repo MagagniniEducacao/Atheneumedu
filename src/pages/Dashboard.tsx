@@ -1,119 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Power, PowerOff, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import {
+    Users, BookOpen, Users2, Link as LinkIcon,
+    CheckCircle, ShieldAlert, ExternalLink, Copy
+} from 'lucide-react';
 
 export const Dashboard = () => {
+    const { profile } = useAuth();
+    const [stats, setStats] = useState({
+        students: 0,
+        electives: 0,
+        clubs: 0,
+        choices: 0
+    });
     const [settings, setSettings] = useState<any[]>([]);
-    const [counts, setCounts] = useState({ students: 0, items: 0, choices: 0 });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchSettings();
-        fetchCounts();
-    }, []);
+        if (profile) {
+            fetchData();
+            fetchSettings();
+        }
+    }, [profile]);
 
-    const fetchSettings = async () => {
-        const { data } = await supabase.from('settings').select('*');
-        if (data) setSettings(data);
+    const fetchData = async () => {
+        const schoolId = profile.school_id;
+
+        const [
+            { count: sCount },
+            { count: eCount },
+            { count: cCount },
+            { count: chCount }
+        ] = await Promise.all([
+            supabase.from('students').select('*', { count: 'exact', head: true }).eq('school_id', schoolId),
+            supabase.from('items').select('*', { count: 'exact', head: true }).eq('type', 'elective').eq('school_id', schoolId),
+            supabase.from('items').select('*', { count: 'exact', head: true }).eq('type', 'club').eq('school_id', schoolId),
+            supabase.from('choices').select('*', { count: 'exact', head: true }).eq('school_id', schoolId),
+        ]);
+
+        setStats({
+            students: sCount || 0,
+            electives: eCount || 0,
+            clubs: cCount || 0,
+            choices: chCount || 0
+        });
+        setLoading(false);
     };
 
-    const fetchCounts = async () => {
-        const { count: studentCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
-        const { count: itemCount } = await supabase.from('items').select('*', { count: 'exact', head: true });
-        const { count: choiceCount } = await supabase.from('choices').select('*', { count: 'exact', head: true });
-        setCounts({
-            students: studentCount || 0,
-            items: itemCount || 0,
-            choices: choiceCount || 0
-        });
+    const fetchSettings = async () => {
+        const { data } = await supabase
+            .from('settings')
+            .select('*')
+            .eq('school_id', profile.school_id);
+        if (data) setSettings(data);
     };
 
     const toggleLink = async (key: string, currentValue: boolean) => {
         const { error } = await supabase
             .from('settings')
             .update({ value: !currentValue, updated_at: new Date() })
-            .eq('key', key);
+            .eq('key', key)
+            .eq('school_id', profile.school_id);
 
         if (!error) fetchSettings();
     };
 
-    const getLink = (type: string) => {
-        return `${window.location.origin}/escolha/${type}`;
+    const copyLink = () => {
+        const baseUrl = window.location.origin;
+        const link = `${baseUrl}/escolha/${profile.schools.slug}`;
+        navigator.clipboard.writeText(link);
+        alert('Link da escola copiado!');
     };
 
-    const copyLink = (text: string) => {
-        navigator.clipboard.writeText(text);
-        alert('Link copiado!');
-    };
-
-    const renderLinkItem = (key: string, label: string, type: string) => {
-        const setting = settings.find(s => s.key === key);
-        const active = setting?.value || false;
-
-        return (
-            <div className="glass" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0 }}>{label}</h4>
-                    <button
-                        onClick={() => toggleLink(key, active)}
-                        style={{
-                            background: active ? '#10b981' : '#6b7280',
-                            color: 'white',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontSize: '12px'
-                        }}
-                    >
-                        {active ? <Power size={14} /> : <PowerOff size={14} />}
-                        {active ? 'Ativado' : 'Desativado'}
-                    </button>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                        readOnly
-                        value={getLink(type)}
-                        className="glass"
-                        style={{ flex: 1, padding: '8px', fontSize: '12px', background: 'rgba(0,0,0,0.02)' }}
-                    />
-                    <button
-                        onClick={() => copyLink(getLink(type))}
-                        style={{ padding: '8px', border: '1px solid var(--border)', background: 'none', borderRadius: '8px' }}
-                    >
-                        <Share2 size={16} />
-                    </button>
-                </div>
-            </div>
-        );
-    };
+    if (loading) return <div>Carregando painel...</div>;
 
     return (
         <div>
-            <h1 style={{ marginBottom: '30px' }}>Dashboard</h1>
+            <header style={{ marginBottom: '40px' }}>
+                <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Olá, Gestor</h1>
+                <p style={{ color: 'var(--text-muted)' }}>Bem-vindo ao painel da <strong>{profile.schools?.name}</strong>.</p>
+            </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-                <div className="glass" style={{ padding: '25px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Total de Alunos</span>
-                    <h2 style={{ fontSize: '32px', marginTop: '10px' }}>{counts.students}</h2>
-                </div>
-                <div className="glass" style={{ padding: '25px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Itens Cadastrados</span>
-                    <h2 style={{ fontSize: '32px', marginTop: '10px' }}>{counts.items}</h2>
-                </div>
-                <div className="glass" style={{ padding: '25px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Escolhas Realizadas</span>
-                    <h2 style={{ fontSize: '32px', marginTop: '10px' }}>{counts.choices}</h2>
-                </div>
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+                <StatCard icon={<Users color="#6366f1" />} label="Total de Alunos" value={stats.students} />
+                <StatCard icon={<BookOpen color="#10b981" />} label="Eletivas Ativas" value={stats.electives} />
+                <StatCard icon={<Users2 color="#f59e0b" />} label="Clubes Juvenis" value={stats.clubs} />
+                <StatCard icon={<CheckCircle color="#ec4899" />} label="Escolhas Feitas" value={stats.choices} />
             </div>
 
-            <h2 style={{ marginBottom: '20px' }}>Controle de Links</h2>
+            <h2 style={{ marginBottom: '20px', fontSize: '20px' }}>Gestão de Inscrições</h2>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                {renderLinkItem('tutor_active', 'Escolha de Tutor', 'tutor')}
-                {renderLinkItem('elective_active', 'Escolha de Eletiva', 'elective')}
-                {renderLinkItem('club_active', 'Escolha de Clube Juvenil', 'club')}
+                {[
+                    { key: 'tutor_active', label: 'Inscrições para Tutoria' },
+                    { key: 'elective_active', label: 'Inscrições para Eletivas' },
+                    { key: 'club_active', label: 'Inscrições para Clubes' },
+                ].map((link) => {
+                    const setting = settings.find(s => s.key === link.key);
+                    const isActive = setting?.value || false;
+
+                    return (
+                        <div key={link.key} className="glass" style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <h3 style={{ margin: 0, fontSize: '18px' }}>{link.label}</h3>
+                                <div
+                                    onClick={() => toggleLink(link.key, isActive)}
+                                    style={{
+                                        width: '45px', height: '24px', background: isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                                        borderRadius: '20px', cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '18px', height: '18px', background: 'white', borderRadius: '50%',
+                                        position: 'absolute', top: '3px', left: isActive ? '24px' : '3px', transition: 'all 0.3s ease'
+                                    }}></div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                <button className="glass" style={{ flex: 1, padding: '10px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={copyLink}>
+                                    <Copy size={14} /> Link Único
+                                </button>
+                                <a
+                                    href={`/escolha/${profile.schools.slug}`}
+                                    target="_blank"
+                                    className="glass"
+                                    style={{ flex: 1, padding: '10px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}
+                                >
+                                    <ExternalLink size={14} /> Visualizar
+                                </a>
+                            </div>
+
+                            {!isActive && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '12px' }}>
+                                    <ShieldAlert size={14} /> Desativado.
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
+
+const StatCard = ({ icon, label, value }: { icon: any, label: string, value: number }) => (
+    <div className="glass" style={{ padding: '25px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>{icon}</div>
+        <div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>{label}</p>
+            <h3 style={{ fontSize: '24px', margin: '5px 0 0' }}>{value}</h3>
+        </div>
+    </div>
+);
