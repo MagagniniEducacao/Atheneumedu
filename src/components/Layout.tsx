@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, BookOpen, Users2, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, BookOpen, Users2, Settings, CheckCircle } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const navItems = [
@@ -10,6 +10,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         { path: '/eletivas', icon: <BookOpen size={20} />, label: 'Eletivas' },
         { path: '/clubes', icon: <Users2 size={20} />, label: 'Clube Juvenil' },
         { path: '/vagas', icon: <Settings size={20} />, label: 'Gestão de Vagas' },
+        { path: '/alocacoes', icon: <CheckCircle size={20} />, label: 'Alocações' },
     ];
 
     return (
