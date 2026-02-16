@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
@@ -8,30 +8,7 @@ export const Login = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [checkingSetup, setCheckingSetup] = useState(true);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        checkSuperAdminExists();
-    }, []);
-
-    const checkSuperAdminExists = async () => {
-        try {
-            const { data } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('role', 'super_admin')
-                .limit(1);
-
-            if (!data || data.length === 0) {
-                navigate('/setup');
-            }
-        } catch (err) {
-            console.error('Error checking super admin:', err);
-        } finally {
-            setCheckingSetup(false);
-        }
-    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,14 +29,6 @@ export const Login = () => {
             navigate('/');
         }
     };
-
-    if (checkingSetup) {
-        return (
-            <div className="flex items-center justify-center" style={{ minHeight: '100vh' }}>
-                <Loader2 className="spinner" size={32} style={{ color: 'var(--primary)' }} />
-            </div>
-        );
-    }
 
     return (
         <div className="flex items-center justify-center" style={{ minHeight: '100vh', padding: 'var(--spacing-lg)' }}>

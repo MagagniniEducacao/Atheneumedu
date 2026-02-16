@@ -9,7 +9,6 @@ import { Vagas } from './pages/Vagas';
 import { Dashboard } from './pages/Dashboard';
 import { ExternalChoice } from './pages/ExternalChoice';
 import { Alocacoes } from './pages/Alocacoes';
-import { SuperAdminSetup } from './pages/SuperAdminSetup';
 import { Login } from './pages/Login';
 import { Configuracoes } from './pages/Configuracoes';
 import { Relatorios } from './pages/Relatorios';
@@ -32,7 +31,6 @@ function App() {
         <Routes>
           {/* Public / Student Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/setup" element={<SuperAdminSetup />} />
           <Route path="/escolha/:slug" element={<ExternalChoice />} />
 
           {/* Protected Management Routes */}
