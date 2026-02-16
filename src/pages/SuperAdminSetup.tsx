@@ -13,7 +13,7 @@ export const SuperAdminSetup = () => {
     }, []);
 
     const checkExists = async () => {
-        const { data, error } = await supabase.rpc('check_any_super_admin_exists');
+        const { data } = await supabase.rpc('check_any_super_admin_exists');
         setExists(data);
     };
 
@@ -46,65 +46,71 @@ export const SuperAdminSetup = () => {
             alert('Erro ao criar perfil: ' + profileError.message);
         } else {
             alert('Super Admin criado com sucesso! Faça login agora.');
-            window.location.reload();
+            window.location.href = '/login';
         }
         setLoading(false);
     };
 
     if (exists === true) {
         return (
-            <div style={{ maxWidth: '500px', margin: '100px auto', padding: '40px', textAlign: 'center' }} className="glass">
-                <ShieldCheck size={60} color="var(--primary)" style={{ marginBottom: '20px' }} />
-                <h2>Acesso Bloqueado</h2>
-                <p style={{ color: 'var(--text-muted)' }}>O administrador principal já foi configurado. Esta página não está mais disponível.</p>
-                <button className="btn-primary" style={{ marginTop: '20px' }} onClick={() => window.location.href = '/login'}>Ir para Login</button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+                <div style={{ width: '500px', padding: '50px 40px', textAlign: 'center' }} className="card">
+                    <div style={{ width: '80px', height: '80px', background: 'rgba(185, 28, 28, 0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 25px' }}>
+                        <ShieldCheck size={40} color="var(--primary)" />
+                    </div>
+                    <h2 style={{ fontSize: '24px', marginBottom: '15px' }}>Acesso Bloqueado</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>O administrador principal já foi configurado. Esta página não está mais disponível.</p>
+                    <button className="btn-primary" style={{ width: '100%', padding: '14px' }} onClick={() => window.location.href = '/login'}>Ir para Login</button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '40px' }} className="glass">
-            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                <div style={{ width: '60px', height: '60px', background: 'var(--primary)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-                    <UserPlus color="white" size={30} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+            <div style={{ width: '450px', padding: '50px 40px' }} className="card">
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <div style={{ width: '70px', height: '70px', background: 'var(--primary)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 10px 15px -3px rgba(185, 28, 28, 0.3)' }}>
+                        <UserPlus color="white" size={32} />
+                    </div>
+                    <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '5px' }}>Configurar Sistema</h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Criação da Conta Mestra (Super Admin)</p>
                 </div>
-                <h2>Configurar Super Admin</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Primeiro acesso ao sistema Atheneum Edu.</p>
-            </div>
 
-            <form onSubmit={handleSetup} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Email</label>
-                    <div style={{ position: 'relative' }}>
-                        <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            type="email"
-                            className="glass"
-                            style={{ width: '100%', padding: '12px 12px 12px 40px', background: 'transparent' }}
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                        />
+                <form onSubmit={handleSetup} style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>Email do Administrador</label>
+                        <div style={{ position: 'relative' }}>
+                            <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input
+                                type="email"
+                                placeholder="seu@email.com"
+                                style={{ paddingLeft: '40px' }}
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Senha</label>
-                    <div style={{ position: 'relative' }}>
-                        <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            type="password"
-                            className="glass"
-                            style={{ width: '100%', padding: '12px 12px 12px 40px', background: 'transparent' }}
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                        />
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>Senha Mestra</label>
+                        <div style={{ position: 'relative' }}>
+                            <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input
+                                type="password"
+                                placeholder="Crie uma senha forte"
+                                style={{ paddingLeft: '40px' }}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
-                </div>
-                <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '14px' }}>
-                    {loading ? 'Configurando...' : 'Criar Conta Mestra'}
-                </button>
-            </form>
+                    <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '15px' }}>
+                        {loading ? 'Configurando...' : 'Finalizar Configuração'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
