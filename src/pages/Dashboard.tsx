@@ -25,6 +25,7 @@ export const Dashboard = () => {
     }, [profile]);
 
     const fetchData = async () => {
+        if (!profile?.school_id) return;
         const schoolId = profile.school_id;
 
         const [
@@ -49,6 +50,7 @@ export const Dashboard = () => {
     };
 
     const fetchSettings = async () => {
+        if (!profile?.school_id) return;
         const { data } = await supabase
             .from('settings')
             .select('*')
@@ -57,6 +59,7 @@ export const Dashboard = () => {
     };
 
     const toggleLink = async (key: string, currentValue: boolean) => {
+        if (!profile?.school_id) return;
         const { error } = await supabase
             .from('settings')
             .update({ value: !currentValue, updated_at: new Date() })
@@ -67,6 +70,7 @@ export const Dashboard = () => {
     };
 
     const copyLink = () => {
+        if (!profile?.schools?.slug) return;
         const baseUrl = window.location.origin;
         const link = `${baseUrl}/escolha/${profile.schools.slug}`;
         navigator.clipboard.writeText(link);
@@ -79,7 +83,7 @@ export const Dashboard = () => {
         <div>
             <header style={{ marginBottom: '40px' }}>
                 <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Olá, Gestor</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Bem-vindo ao painel da <strong>{profile.schools?.name}</strong>.</p>
+                <p style={{ color: 'var(--text-muted)' }}>Bem-vindo ao painel da <strong>{profile?.schools?.name || 'sua escola'}</strong>.</p>
             </header>
 
             {/* Stats Grid */}
@@ -124,7 +128,7 @@ export const Dashboard = () => {
                                     <Copy size={14} /> Link Único
                                 </button>
                                 <a
-                                    href={`/escolha/${profile.schools.slug}`}
+                                    href={`/escolha/${profile?.schools?.slug || ''}`}
                                     target="_blank"
                                     className="glass"
                                     style={{ flex: 1, padding: '10px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}

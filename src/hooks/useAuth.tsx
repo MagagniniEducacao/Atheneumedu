@@ -10,6 +10,7 @@ interface Profile {
     schools?: {
         id: string;
         name: string;
+        slug: string;
     };
 }
 
