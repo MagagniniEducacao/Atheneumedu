@@ -18,13 +18,12 @@ export const SuperAdminSetup = () => {
 
     const checkExists = async () => {
         try {
-            const { data } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('role', 'super_admin')
-                .limit(1);
+            const { data: exists, error: rpcError } = await supabase
+                .rpc('has_super_admin');
 
-            if (data && data.length > 0) {
+            if (rpcError) throw rpcError;
+
+            if (exists) {
                 setError('Um Administrador Mestre já existe no sistema. Por favor, faça login.');
             }
         } catch (err) {
