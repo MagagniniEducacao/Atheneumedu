@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?
 
   if (loading) return <div>Carregando...</div>;
   if (!user) return <Navigate to="/login" />;
-  if (roles && !roles.includes(profile?.role)) return <Navigate to="/" />;
+  if (roles && profile && !roles.includes(profile.role)) return <Navigate to="/" />;
 
   return <Layout>{children}</Layout>;
 };
