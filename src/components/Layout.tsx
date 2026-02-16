@@ -12,11 +12,22 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const navigate = useNavigate();
 
     const navItems = [
+        // SuperAdmin & Manager tabs
         { path: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard', roles: ['super_admin', 'admin', 'manager'] },
-        { path: '/configuracoes', icon: <Settings size={20} />, label: 'Configurações', roles: ['manager'] },
-        { path: '/alocacoes', icon: <CheckCircle size={20} />, label: 'Alocações', roles: ['manager'] },
-        { path: '/relatorios', icon: <ChevronRight size={20} />, label: 'Relatórios', roles: ['manager'] },
-        { path: '/administrador', icon: <Shield size={20} />, label: 'Administrador', roles: ['super_admin', 'admin'] },
+
+        // SuperAdmin only tabs
+        { path: '/escolas', icon: <GraduationCap size={20} />, label: 'Escolas', roles: ['super_admin'] },
+        { path: '/administrador', icon: <Shield size={20} />, label: 'Gestores', roles: ['super_admin', 'admin'] },
+
+        // Manager tabs (SuperAdmin also has access)
+        { path: '/alunos', icon: <Users size={20} />, label: 'Alunos', roles: ['super_admin', 'manager'] },
+        { path: '/professores', icon: <GraduationCap size={20} />, label: 'Professores', roles: ['super_admin', 'manager'] },
+        { path: '/eletivas', icon: <BookOpen size={20} />, label: 'Eletivas', roles: ['super_admin', 'manager'] },
+        { path: '/clubes', icon: <Users2 size={20} />, label: 'Clubes', roles: ['super_admin', 'manager'] },
+        { path: '/tutoria', icon: <Users size={20} />, label: 'Tutoria', roles: ['super_admin', 'manager'] },
+        { path: '/alocacoes', icon: <CheckCircle size={20} />, label: 'Alocações', roles: ['super_admin', 'manager'] },
+        { path: '/relatorios', icon: <ChevronRight size={20} />, label: 'Relatórios', roles: ['super_admin', 'manager'] },
+        { path: '/configuracoes', icon: <Settings size={20} />, label: 'Configurações', roles: ['super_admin', 'manager'] },
     ];
 
     const filteredItems = navItems.filter(item => profile && item.roles.includes(profile.role));

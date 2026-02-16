@@ -64,9 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (userId: string) => {
         try {
-            const { data, error: profileError } = await supabase
+            // First, get the basic profile without JOIN
+            const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('*, schools(*)')
+                .select('*')
                 .eq('id', userId)
                 .single();
 
@@ -74,17 +75,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.error('Profile fetch error:', profileError);
                 setError('Erro ao carregar perfil');
                 setProfile(null);
-            } else {
-                // Handle the case where schools is an array (from LEFT JOIN)
-                const profileData = {
-                    ...data,
-                    schools: Array.isArray(data.schools) && data.schools.length > 0
-                        ? data.schools[0]
-                        : data.schools || null
-                };
-                setProfile(profileData);
-                setError(null);
+                setLoading(false);
+                return;
             }
+
+            // If profile has a school_id, fetch the school data separately
+            if (profileData.school_id) {
+                const { data: schoolData } = await supabase
+                    .from('schools')
+                    .select('*')
+                    .eq('id', profileData.school_id)
+                    .single();
+
+                setProfile({
+                    ...profileData,
+                    schools: schoolData || null
+                });
+            } else {
+                // SuperAdmin or users without school
+                setProfile(profileData);
+            }
+
+            setError(null);
         } catch (err) {
             console.error('Unexpected error fetching profile:', err);
             setError('Erro inesperado ao carregar perfil');
