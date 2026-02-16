@@ -75,7 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setError('Erro ao carregar perfil');
                 setProfile(null);
             } else {
-                setProfile(data);
+                // Handle the case where schools is an array (from LEFT JOIN)
+                const profileData = {
+                    ...data,
+                    schools: Array.isArray(data.schools) && data.schools.length > 0
+                        ? data.schools[0]
+                        : data.schools || null
+                };
+                setProfile(profileData);
                 setError(null);
             }
         } catch (err) {
