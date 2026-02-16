@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, School, UserPlus, Trash2, Key } from 'lucide-react';
+import { Plus, School, UserPlus, Trash2, Key as PasswordIcon } from 'lucide-react';
 
 export const Administrador = () => {
     const [schools, setSchools] = useState<any[]>([]);
@@ -136,7 +136,7 @@ export const Administrador = () => {
                             <div key={m.id} className="glass" style={{ padding: '10px 15px', display: 'flex', flexDirection: 'column', gap: '5px', background: 'rgba(255,255,255,0.02)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span>{m.id.substring(0, 8)}...</span>
-                                    {m.needs_password_change && <Key size={14} color="#f59e0b" title="Senha Provisória" />}
+                                    {m.needs_password_change && <PasswordIcon size={14} color="#f59e0b" />}
                                 </div>
                                 <small style={{ color: 'var(--text-muted)' }}>Escola: {m.schools?.name}</small>
                             </div>
