@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, ShieldCheck, Mail, Lock, Loader2 } from 'lucide-react';
+import { UserPlus, ShieldCheck, Mail, Lock, Loader2, LogIn } from 'lucide-react';
 
 export const SuperAdminSetup = () => {
     const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ export const SuperAdminSetup = () => {
                 .limit(1);
 
             if (data && data.length > 0) {
-                navigate('/login');
+                setError('Um Administrador Mestre já existe no sistema. Por favor, faça login.');
             }
         } catch (err) {
             console.error('Error checking super admin:', err);
@@ -216,13 +216,18 @@ export const SuperAdminSetup = () => {
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={loading}
+                        disabled={loading || !!(error && error.includes('já existe'))}
                         style={{ width: '100%', padding: '0.75rem' }}
                     >
                         {loading ? (
                             <>
                                 <Loader2 className="spinner" size={18} />
                                 Configurando...
+                            </>
+                        ) : error && error.includes('já existe') ? (
+                            <>
+                                <LogIn size={18} />
+                                Ir para Login
                             </>
                         ) : (
                             <>
@@ -231,6 +236,16 @@ export const SuperAdminSetup = () => {
                             </>
                         )}
                     </button>
+                    {error && error.includes('já existe') && (
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => navigate('/login')}
+                            style={{ width: '100%', padding: '0.75rem' }}
+                        >
+                            Fazer Login
+                        </button>
+                    )}
                 </form>
             </div>
         </div>

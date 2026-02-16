@@ -17,6 +17,7 @@ import { Alocacoes } from './pages/Alocacoes';
 import { Relatorios } from './pages/Relatorios';
 import { Configuracoes } from './pages/Configuracoes';
 import { ExternalChoice } from './pages/ExternalChoice';
+import { SuperAdminSetup } from './pages/SuperAdminSetup';
 
 const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
   const { user, profile, loading } = useAuth();
@@ -61,6 +62,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/setup" element={<SuperAdminSetup />} />
           <Route path="/escolha/:slug" element={<ExternalChoice />} />
 
           {/* Protected Routes */}
