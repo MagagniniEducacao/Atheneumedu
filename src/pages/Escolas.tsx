@@ -1,198 +1,138 @@
-import React, { useState } from 'react';
-import { GraduationCap, Plus, Trash2, Edit2, Building2 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, Building2, CheckCircle, XCircle, ChevronRight, Search } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export const Escolas: React.FC = () => {
-    const { profile } = useAuth();
     const [schools, setSchools] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        fetchSchools();
+    }, []);
+
+    const fetchSchools = async () => {
+        setLoading(true);
+        const { data } = await supabase
+            .from('schools')
+            .select('*')
+            .order('name');
+        setSchools(data || []);
+        setLoading(false);
+    };
+
+    const toggleSchoolStatus = async (id: string, currentStatus: boolean) => {
+        const { error } = await supabase
+            .from('schools')
+            .update({ is_active: !currentStatus })
+            .eq('id', id);
+
+        if (!error) fetchSchools();
+    };
+
+    const filteredSchools = schools.filter(s =>
+        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div style={{ padding: '40px' }}>
-            {/* Header */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '40px'
-            }}>
+        <div style={{ padding: 'var(--spacing-xl)' }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2xl)' }}>
                 <div>
-                    <h1 style={{
-                        fontSize: '32px',
-                        fontWeight: 'bold',
-                        marginBottom: '8px',
-                        background: 'linear-gradient(135deg, var(--primary) 0%, #dc2626 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>
-                        Gerenciar Escolas
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: '800', marginBottom: 'var(--spacing-xs)' }}>
+                        Rede de <span style={{ color: 'var(--primary)' }}>Escolas</span>
                     </h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>
-                        Cadastre e gerencie as escolas do sistema
-                    </p>
+                    <p style={{ color: 'var(--text-muted)' }}>Monitoramento e controle de acesso institucional</p>
                 </div>
 
-                <button style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '12px 24px',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontSize: '15px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 12px rgba(185, 28, 28, 0.3)'
-                }}>
-                    <Plus size={20} />
-                    Nova Escola
-                </button>
-            </div>
+                <div style={{ position: 'relative', width: '300px' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                        type="text"
+                        placeholder="Buscar escola..."
+                        style={{ paddingLeft: '40px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </header>
 
-            {/* Stats Cards */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '20px',
-                marginBottom: '40px'
-            }}>
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '16px',
-                    padding: '24px',
-                    transition: 'all 0.3s ease'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                        <div style={{
-                            width: '48px',
-                            height: '48px',
-                            background: 'linear-gradient(135deg, var(--primary) 0%, #dc2626 100%)',
-                            borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <Building2 size={24} color="white" />
-                        </div>
-                        <div>
-                            <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                                Total de Escolas
-                            </p>
-                            <p style={{ fontSize: '28px', fontWeight: 'bold' }}>
-                                {schools.length}
-                            </p>
-                        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-2xl)' }}>
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ width: '56px', height: '56px', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Building2 size={28} />
+                    </div>
+                    <div>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: '600' }}>TOTAL DE UNIDADES</p>
+                        <p style={{ fontSize: '1.75rem', fontWeight: '800' }}>{schools.length}</p>
+                    </div>
+                </div>
+
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ width: '56px', height: '56px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckCircle size={28} />
+                    </div>
+                    <div>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: '600' }}>UNIDADES ATIVAS</p>
+                        <p style={{ fontSize: '1.75rem', fontWeight: '800' }}>{schools.filter(s => s.is_active).length}</p>
                     </div>
                 </div>
             </div>
 
-            {/* Schools List */}
-            <div style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                overflow: 'hidden'
-            }}>
-                <div style={{
-                    padding: '24px',
-                    borderBottom: '1px solid var(--border)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: '600' }}>Escolas Cadastradas</h2>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ padding: '24px', borderBottom: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+                    <h2 style={{ fontSize: '1.125rem', fontWeight: '700' }}>Visão Geral das Instituições</h2>
                 </div>
 
                 <div style={{ padding: '24px' }}>
                     {loading ? (
-                        <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
-                            Carregando escolas...
-                        </p>
-                    ) : schools.length === 0 ? (
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '60px 20px',
-                            color: 'var(--text-muted)'
-                        }}>
-                            <GraduationCap size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-                            <p style={{ fontSize: '16px', marginBottom: '8px' }}>Nenhuma escola cadastrada</p>
-                            <p style={{ fontSize: '14px' }}>Clique em "Nova Escola" para começar</p>
-                        </div>
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Sincronizando com a base de dados...</div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {schools.map((school) => (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                            {filteredSchools.map((school) => (
                                 <div
                                     key={school.id}
+                                    className="card"
                                     style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        padding: '16px',
-                                        background: 'rgba(255, 255, 255, 0.02)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '12px',
-                                        transition: 'all 0.2s ease'
+                                        background: 'var(--bg-main)',
+                                        border: school.is_active ? '1px solid var(--border)' : '1px solid rgba(239, 68, 68, 0.2)',
+                                        padding: '20px',
+                                        transition: 'var(--transition)'
                                     }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                        <div style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            background: 'linear-gradient(135deg, var(--primary) 0%, #dc2626 100%)',
-                                            borderRadius: '10px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <GraduationCap size={20} color="white" />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                        <div style={{ width: '48px', height: '48px', background: school.is_active ? 'var(--primary-light)' : 'rgba(0,0,0,0.05)', color: school.is_active ? 'var(--primary)' : 'var(--text-muted)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <GraduationCap size={24} />
                                         </div>
-                                        <div>
-                                            <p style={{ fontSize: '15px', fontWeight: '500', marginBottom: '4px' }}>
-                                                {school.name}
-                                            </p>
-                                            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                                                Slug: {school.slug}
-                                            </p>
-                                        </div>
+                                        <button
+                                            onClick={() => toggleSchoolStatus(school.id, school.is_active)}
+                                            style={{
+                                                fontSize: '0.6875rem',
+                                                fontWeight: '800',
+                                                textTransform: 'uppercase',
+                                                padding: '4px 10px',
+                                                borderRadius: '20px',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                background: school.is_active ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                color: school.is_active ? '#059669' : '#dc2626'
+                                            }}
+                                        >
+                                            {school.is_active ? 'Ativada' : 'Bloqueada'}
+                                        </button>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button style={{
-                                            padding: '8px 12px',
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            border: '1px solid var(--border)',
-                                            borderRadius: '8px',
-                                            color: 'var(--text-main)',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s ease',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}>
-                                            <Edit2 size={16} />
-                                            Editar
-                                        </button>
-                                        <button style={{
-                                            padding: '8px 12px',
-                                            background: 'rgba(220, 38, 38, 0.1)',
-                                            border: '1px solid rgba(220, 38, 38, 0.3)',
-                                            borderRadius: '8px',
-                                            color: '#dc2626',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s ease',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}>
-                                            <Trash2 size={16} />
-                                            Excluir
-                                        </button>
+                                    <h3 style={{ fontSize: '1.125rem', fontWeight: '700', marginBottom: '4px' }}>{school.name}</h3>
+                                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '20px' }}>ID: {school.slug}</p>
+
+                                    <div style={{ paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            {school.is_active ? <CheckCircle size={14} color="#059669" /> : <XCircle size={14} color="#dc2626" />}
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: school.is_active ? '#059669' : '#dc2626' }}>
+                                                {school.is_active ? 'Pronta para Ensino' : 'Acesso Interrompido'}
+                                            </span>
+                                        </div>
+                                        <ChevronRight size={18} style={{ opacity: 0.3 }} />
                                     </div>
                                 </div>
                             ))}

@@ -44,36 +44,43 @@ export const ImportStudentsModal: React.FC<ImportStudentsModalProps> = ({ isOpen
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'rgba(2, 6, 23, 0.8)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            backdropFilter: 'blur(4px)'
+            padding: '20px',
+            backdropFilter: 'blur(12px)'
         }}>
-            <div className="glass" style={{ width: '500px', maxWidth: '90%', padding: '30px', position: 'relative' }}>
+            <div className="card" style={{ width: '550px', maxWidth: '100%', padding: '40px', position: 'relative', boxShadow: 'var(--shadow-lg)' }}>
                 <button
                     onClick={onClose}
-                    style={{ position: 'absolute', right: '20px', top: '20px', background: 'none', border: 'none', color: 'var(--text-muted)' }}
+                    style={{ position: 'absolute', right: '25px', top: '25px', background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'var(--transition)' }}
                 >
-                    <X size={24} />
+                    <X size={20} />
                 </button>
 
-                <h2 style={{ marginBottom: '20px' }}>Importar Alunos da SED</h2>
-
-                <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '14px' }}>
-                    Selecione a planilha da SED contendo as colunas: Nome (B), RA (C), Dígito (D) e Data de Nascimento (E).
-                </p>
+                <div style={{ marginBottom: '30px' }}>
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '10px' }}>Importar Alunos</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: '1.5' }}>
+                        Selecione a planilha exportada da SED (Secretaria Escolar Digital).<br />
+                        <strong>Formato esperado:</strong> Nome (B), RA (C), Dígito (D) e Nascimento (E).
+                    </p>
+                </div>
 
                 {!result ? (
                     <div style={{
                         border: '2px dashed var(--border)',
-                        borderRadius: '12px',
-                        padding: '40px',
+                        borderRadius: 'var(--radius-lg)',
+                        background: 'var(--bg-main)',
+                        padding: '50px 20px',
                         textAlign: 'center',
-                        marginBottom: '20px'
+                        marginBottom: '30px',
+                        transition: 'var(--transition)'
                     }}>
-                        <Upload size={40} style={{ color: 'var(--primary)', marginBottom: '15px' }} />
+                        <div style={{ width: '64px', height: '64px', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                            <Upload size={32} />
+                        </div>
                         <input
                             type="file"
                             accept=".xlsx, .xls, .csv"
@@ -81,44 +88,59 @@ export const ImportStudentsModal: React.FC<ImportStudentsModalProps> = ({ isOpen
                             style={{ display: 'none' }}
                             id="file-upload"
                         />
-                        <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                            <span className="btn-primary" style={{ display: 'inline-block' }}>
-                                {file ? file.name : 'Selecionar Arquivo'}
-                            </span>
+                        <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
+                            <div style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '6px' }}>
+                                {file ? file.name : 'Clique para selecionar'}
+                            </div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                                ou arraste o arquivo aqui (XLSX, XLS ou CSV)
+                            </div>
                         </label>
                     </div>
                 ) : (
-                    <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                    <div style={{
+                        marginBottom: '30px',
+                        padding: '24px',
+                        borderRadius: 'var(--radius-md)',
+                        background: result.success > 0 ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                        border: result.success > 0 ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'
+                    }}>
                         {result.success > 0 ? (
-                            <div style={{ color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <CheckCircle size={24} />
+                            <div style={{ color: '#059669', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600' }}>
+                                <div style={{ background: '#10b981', color: 'white', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <CheckCircle size={18} />
+                                </div>
                                 <span>{result.success} alunos importados com sucesso!</span>
                             </div>
                         ) : (
-                            <div style={{ color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <div style={{ color: '#dc2626', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600' }}>
                                 <AlertCircle size={24} />
-                                <span>Erro na importação.</span>
+                                <span>Ops! Não foi possível realizar a importação.</span>
                             </div>
                         )}
                         {result.errors.length > 0 && (
-                            <ul style={{ marginTop: '10px', textAlign: 'left', fontSize: '12px', color: '#ef4444' }}>
-                                {result.errors.map((err, i) => <li key={i}>{err}</li>)}
-                            </ul>
+                            <div style={{ marginTop: '16px' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '8px' }}>Detalhes do processamento:</div>
+                                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.875rem', color: '#dc2626', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    {result.errors.map((err, i) => <li key={i}>{err}</li>)}
+                                </ul>
+                            </div>
                         )}
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                    <button onClick={onClose} style={{ padding: '10px 20px', border: '1px solid var(--border)', background: 'none', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <button onClick={onClose} className="btn btn-secondary">
                         {result ? 'Fechar' : 'Cancelar'}
                     </button>
                     {!result && (
                         <button
-                            className="btn-primary"
+                            className="btn btn-primary"
                             disabled={!file || importing}
                             onClick={handleImport}
+                            style={{ minWidth: '180px' }}
                         >
-                            {importing ? 'Processando...' : 'Iniciar Importação'}
+                            {importing ? 'Processando dados...' : 'Iniciar Importação'}
                         </button>
                     )}
                 </div>

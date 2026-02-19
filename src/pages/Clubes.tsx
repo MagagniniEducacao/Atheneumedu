@@ -46,44 +46,53 @@ export const Clubes = () => {
     };
 
     return (
-        <div>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1>Clube Juvenil</h1>
+        <div style={{ padding: 'var(--spacing-xl)' }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2xl)' }}>
+                <div>
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: '800', marginBottom: 'var(--spacing-xs)' }}>
+                        Clubes <span style={{ color: 'var(--primary)' }}>Juvenis</span>
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Protagonismo juvenil e espaços de convivência</p>
+                </div>
                 <button
-                    className="btn-primary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    className={showForm ? 'btn btn-secondary' : 'btn btn-primary'}
                     onClick={() => setShowForm(!showForm)}
                 >
-                    <Plus size={20} /> {showForm ? 'Cancelar' : 'Novo Clube'}
+                    {showForm ? 'Cancelar' : <><Plus size={20} /> Novo Clube</>}
                 </button>
             </header>
 
             {showForm && (
-                <div className="glass" style={{ padding: '25px', marginBottom: '25px' }}>
-                    <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                <div className="card" style={{ padding: '25px', marginBottom: 'var(--spacing-xl)', background: 'var(--bg-card)' }}>
+                    <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-lg)' }}>
                         <div>
                             <label>Nome do Clube</label>
-                            <input type="text" className="glass" style={{ width: '100%', padding: '10px' }} value={newName} onChange={e => setNewName(e.target.value)} required />
+                            <input type="text" placeholder="Ex: Clube de Robótica" value={newName} onChange={e => setNewName(e.target.value)} required />
                         </div>
                         <div>
                             <label>Descrição / Proposta</label>
-                            <textarea className="glass" style={{ width: '100%', padding: '10px', height: '80px' }} value={newDesc} onChange={e => setNewDesc(e.target.value)} />
+                            <textarea placeholder="Qual o objetivo e atividades deste clube?" style={{ height: '100px' }} value={newDesc} onChange={e => setNewDesc(e.target.value)} />
                         </div>
-                        <button type="submit" className="btn-primary">Criar Clube Juvenil</button>
+                        <button type="submit" className="btn btn-primary" style={{ padding: '12px' }}>Criar Clube Juvenil</button>
                     </form>
                 </div>
             )}
 
-            <div className="glass" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', padding: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--spacing-lg)' }}>
                 {clubes.map(c => (
-                    <div key={c.id} style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                            <Users2 size={24} style={{ color: 'var(--primary)' }} />
-                            <h3 style={{ margin: 0 }}>{c.name}</h3>
+                    <div key={c.id} className="card" style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ width: '48px', height: '48px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Users2 size={24} />
+                            </div>
+                            <button style={{ color: '#ef4444', background: 'transparent', opacity: 0.6 }}><Trash2 size={18} /></button>
                         </div>
-                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '15px' }}>{c.description || 'Sem descrição.'}</p>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <button style={{ color: 'var(--primary)', background: 'none', border: 'none' }}><Trash2 size={18} /></button>
+                        <div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '8px' }}>{c.name}</h3>
+                            <p style={{ fontSize: '0.925rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{c.description || 'Nenhuma descrição fornecida para este clube.'}</p>
+                        </div>
+                        <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'flex-end' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ativo</span>
                         </div>
                     </div>
                 ))}

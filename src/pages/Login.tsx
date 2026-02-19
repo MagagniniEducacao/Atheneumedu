@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 export const Login = () => {
+    const { error: globalError } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [localError, setLocalError] = useState('');
     const navigate = useNavigate();
+
+    const displayError = localError || globalError;
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
+        setLocalError('');
 
         const { error: authError } = await supabase.auth.signInWithPassword({
             email,
@@ -21,7 +25,7 @@ export const Login = () => {
         });
 
         if (authError) {
-            setError(authError.message === 'Invalid login credentials'
+            setLocalError(authError.message === 'Invalid login credentials'
                 ? 'E-mail ou senha incorretos'
                 : 'Erro ao fazer login. Tente novamente.');
             setLoading(false);
@@ -57,7 +61,7 @@ export const Login = () => {
 
                 {/* Form */}
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                    {error && (
+                    {displayError && (
                         <div style={{
                             padding: 'var(--spacing-md)',
                             background: '#fee2e2',
@@ -66,7 +70,7 @@ export const Login = () => {
                             color: '#991b1b',
                             fontSize: '0.875rem',
                         }}>
-                            {error}
+                            {displayError}
                         </div>
                     )}
 

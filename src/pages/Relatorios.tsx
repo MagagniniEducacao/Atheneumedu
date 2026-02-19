@@ -7,26 +7,34 @@ const CurtainBlock = ({ title, children, subtitle }: { title: string, children: 
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="glass" style={{ marginBottom: '15px', overflow: 'hidden' }}>
+        <div className="card" style={{ marginBottom: '16px', padding: 0, overflow: 'hidden', border: isOpen ? '1px solid var(--primary)' : '1px solid var(--border)', transition: 'var(--transition)' }}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     width: '100%',
-                    padding: '20px',
+                    padding: '24px',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'none',
+                    background: isOpen ? 'var(--bg-main)' : 'transparent',
                     border: 'none',
                     cursor: 'pointer',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    transition: 'var(--transition)'
                 }}
             >
-                <div>
-                    <h3 style={{ margin: 0, fontSize: '18px' }}>{title}</h3>
-                    {subtitle && <p style={{ margin: '5px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>{subtitle}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ width: '40px', height: '40px', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Users size={20} />
+                    </div>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-primary)' }}>{title}</h3>
+                        {subtitle && <p style={{ margin: '4px 0 0', fontSize: '0.8125rem', color: 'var(--text-muted)', fontWeight: '500' }}>{subtitle}</p>}
+                    </div>
                 </div>
-                {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                <div style={{ color: isOpen ? 'var(--primary)' : 'var(--text-muted)' }}>
+                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </div>
             </button>
 
             <AnimatePresence>
@@ -35,9 +43,9 @@ const CurtainBlock = ({ title, children, subtitle }: { title: string, children: 
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        style={{ borderTop: '1px solid var(--border)', overflow: 'hidden' }}
+                        style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-card)' }}
                     >
-                        <div style={{ padding: '20px' }}>
+                        <div style={{ padding: '24px' }}>
                             {children}
                         </div>
                     </motion.div>
@@ -87,69 +95,134 @@ export const Relatorios = () => {
     };
 
     return (
-        <div>
-            <h1 style={{ marginBottom: '30px' }}>Relatórios de Atividades</h1>
+        <div style={{ padding: 'var(--spacing-xl)' }}>
+            <header style={{ marginBottom: 'var(--spacing-2xl)' }}>
+                <h1 style={{ fontSize: '2.25rem', fontWeight: '800', marginBottom: 'var(--spacing-xs)' }}>
+                    Central de <span style={{ color: 'var(--primary)' }}>Relatórios</span>
+                </h1>
+                <p style={{ color: 'var(--text-muted)' }}>Analise a ocupação e o engajamento dos alunos</p>
+            </header>
 
-            <div className="glass" style={{ display: 'flex', gap: '10px', padding: '10px', marginBottom: '30px' }}>
-                <button className={type === 'tutor' ? 'btn-primary' : 'glass'} onClick={() => setType('tutor')}>Tutorias</button>
-                <button className={type === 'club' ? 'btn-primary' : 'glass'} onClick={() => setType('club')}>Clubes</button>
-                <button className={type === 'elective' ? 'btn-primary' : 'glass'} onClick={() => setType('elective')}>Eletivas</button>
+            <div style={{
+                display: 'inline-flex',
+                background: 'var(--bg-card)',
+                padding: '6px',
+                borderRadius: '14px',
+                border: '1px solid var(--border)',
+                marginBottom: 'var(--spacing-2xl)',
+                gap: '4px'
+            }}>
+                <button
+                    className={type === 'tutor' ? 'btn btn-primary' : 'btn btn-ghost'}
+                    style={{ padding: '8px 24px', borderRadius: '10px' }}
+                    onClick={() => setType('tutor')}
+                >
+                    Tutorias
+                </button>
+                <button
+                    className={type === 'club' ? 'btn btn-primary' : 'btn btn-ghost'}
+                    style={{ padding: '8px 24px', borderRadius: '10px' }}
+                    onClick={() => setType('club')}
+                >
+                    Clubes
+                </button>
+                <button
+                    className={type === 'elective' ? 'btn btn-primary' : 'btn btn-ghost'}
+                    style={{ padding: '8px 24px', borderRadius: '10px' }}
+                    onClick={() => setType('elective')}
+                >
+                    Eletivas
+                </button>
             </div>
 
-            <div style={{ marginBottom: '50px' }}>
+            <div style={{ marginBottom: '60px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ width: '4px', height: '24px', background: 'var(--primary)', borderRadius: '4px' }}></div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800' }}>Relatório por Atividade</h2>
+                </div>
                 {activities.map(act => (
                     <CurtainBlock
                         key={act.id}
                         title={act.name}
-                        subtitle={`${act.teachers?.name || 'Sem professor'} | Vagas: ${act.studentList.length}/${act.slots}`}
+                        subtitle={`${act.teachers?.name || 'Sem professor'} • ${act.studentList.length} de ${act.slots} vagas preenchidas`}
                     >
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
-                                    <th style={{ padding: '10px' }}>Aluno</th>
-                                    <th style={{ padding: '10px' }}>RAsp</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {act.studentList.map((s: any) => (
-                                    <tr key={s.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                        <td style={{ padding: '10px' }}>{s.students.name}</td>
-                                        <td style={{ padding: '10px' }}>{s.students.ra_sp}</td>
+                        <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'var(--bg-main)' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.02)' }}>
+                                        <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Aluno</th>
+                                        <th style={{ padding: '14px 20px', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>RAsp / Identificador</th>
                                     </tr>
-                                ))}
-                                {act.studentList.length === 0 && (
-                                    <tr><td colSpan={2} style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>Nenhum aluno alocado.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {act.studentList.map((s: any) => (
+                                        <tr key={s.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                            <td style={{ padding: '14px 20px', fontWeight: '600' }}>{s.students.name}</td>
+                                            <td style={{ padding: '14px 20px', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{s.students.ra_sp}</td>
+                                        </tr>
+                                    ))}
+                                    {act.studentList.length === 0 && (
+                                        <tr>
+                                            <td colSpan={2} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                                                Nenhum aluno alocado nesta atividade até o momento.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </CurtainBlock>
                 ))}
             </div>
 
-            <h2 style={{ marginBottom: '20px' }}>Relatório Geral (Prioridade)</h2>
-            <div className="glass" style={{ overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ width: '4px', height: '24px', background: 'var(--primary)', borderRadius: '4px' }}></div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '800' }}>Relatório Geral (Prioridade)</h2>
+            </div>
+
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ background: 'rgba(0,0,0,0.05)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                            <th style={{ padding: '15px' }}>Aluno</th>
-                            <th style={{ padding: '15px' }}>Status {type === 'elective' ? 'Eletiva' : type === 'club' ? 'Clube' : 'Tutoria'}</th>
+                        <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                            <th style={{ padding: '18px 24px', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Aluno</th>
+                            <th style={{ padding: '18px 24px', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Status {type === 'elective' ? 'Eletiva' : type === 'club' ? 'Clube' : 'Tutoria'}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {generalReport.map(student => {
                             const allocation = student.allocations?.find((a: any) => a.type === type);
                             return (
-                                <tr key={student.ra_sp} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '15px' }}>{student.name}</td>
-                                    <td style={{ padding: '15px' }}>
+                                <tr key={student.ra_sp} className="table-row">
+                                    <td style={{ padding: '18px 24px', fontWeight: '600' }}>{student.name}</td>
+                                    <td style={{ padding: '18px 24px' }}>
                                         {allocation ? (
-                                            <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <CheckCircle size={14} /> Alocado
-                                            </span>
+                                            <div style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                color: '#059669',
+                                                fontSize: '0.8125rem',
+                                                fontWeight: '700',
+                                                background: 'rgba(5, 150, 105, 0.08)',
+                                                padding: '4px 12px',
+                                                borderRadius: '20px'
+                                            }}>
+                                                <CheckCircle size={14} /> ALOCADO
+                                            </div>
                                         ) : (
-                                            <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <Clock size={14} /> Lista de Espera / Não Escolheu
-                                            </span>
+                                            <div style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                color: '#ef4444',
+                                                fontSize: '0.8125rem',
+                                                fontWeight: '700',
+                                                background: 'rgba(239, 68, 68, 0.08)',
+                                                padding: '4px 12px',
+                                                borderRadius: '20px'
+                                            }}>
+                                                <AlertCircle size={14} /> PENDENTE
+                                            </div>
                                         )}
                                     </td>
                                 </tr>

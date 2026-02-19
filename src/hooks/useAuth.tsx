@@ -7,10 +7,12 @@ interface Profile {
     role: 'super_admin' | 'admin' | 'manager' | 'student';
     school_id: string | null;
     needs_password_change: boolean;
+    provisional_password?: string;
     schools?: {
         id: string;
         name: string;
         slug: string;
+        is_active: boolean;
     };
 }
 
@@ -64,10 +66,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (userId: string) => {
         try {
-            // First, get the basic profile without JOIN
+            // Fetch profile with school data if present
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('*, schools(*)')
                 .eq('id', userId)
                 .single();
 
@@ -79,23 +81,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return;
             }
 
-            // If profile has a school_id, fetch the school data separately
-            if (profileData.school_id) {
-                const { data: schoolData } = await supabase
-                    .from('schools')
-                    .select('*')
-                    .eq('id', profileData.school_id)
-                    .single();
-
-                setProfile({
-                    ...profileData,
-                    schools: schoolData || null
-                });
-            } else {
-                // SuperAdmin or users without school
-                setProfile(profileData);
+            // Check if school is active for non-superadmins
+            if (profileData.role !== 'super_admin' && profileData.school_id && profileData.schools) {
+                if (!profileData.schools.is_active) {
+                    await supabase.auth.signOut();
+                    setError('Esta escola está desativada. Entre em contato com o suporte.');
+                    setProfile(null);
+                    setLoading(false);
+                    return;
+                }
             }
 
+            setProfile(profileData);
             setError(null);
         } catch (err) {
             console.error('Unexpected error fetching profile:', err);

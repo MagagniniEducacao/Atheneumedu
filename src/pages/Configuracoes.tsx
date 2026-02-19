@@ -31,28 +31,40 @@ export const Configuracoes = () => {
     };
 
     return (
-        <div>
-            <h1 style={{ marginBottom: '30px' }}>Configurações da Escola</h1>
+        <div style={{ padding: 'var(--spacing-xl)' }}>
+            <header style={{ marginBottom: 'var(--spacing-2xl)' }}>
+                <h1 style={{ fontSize: '2.25rem', fontWeight: '800', marginBottom: 'var(--spacing-xs)' }}>
+                    Configurações da <span style={{ color: 'var(--primary)' }}>Instituição</span>
+                </h1>
+                <p style={{ color: 'var(--text-muted)' }}>Gerencie os parâmetros globais e cadastros bases</p>
+            </header>
 
             {/* Tab Navigation */}
-            <div className="glass" style={{ display: 'flex', gap: '5px', padding: '5px', marginBottom: '30px', borderRadius: '15px', overflowX: 'auto' }}>
+            <div style={{
+                display: 'inline-flex',
+                background: 'var(--bg-card)',
+                padding: '6px',
+                borderRadius: '16px',
+                border: '1px solid var(--border)',
+                marginBottom: 'var(--spacing-2xl)',
+                gap: '4px',
+                overflowX: 'auto',
+                maxWidth: '100%'
+            }}>
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
+                        className={activeTab === tab.id ? 'btn btn-primary' : 'btn btn-ghost'}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 20px',
-                            borderRadius: '10px',
-                            border: 'none',
-                            background: activeTab === tab.id ? 'var(--primary)' : 'transparent',
-                            color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
+                            gap: '10px',
+                            padding: '10px 20px',
+                            borderRadius: '12px',
                             whiteSpace: 'nowrap',
-                            fontWeight: 500
+                            fontSize: '0.875rem',
+                            fontWeight: '600'
                         }}
                     >
                         {tab.icon}
@@ -62,7 +74,7 @@ export const Configuracoes = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="fade-in">
+            <div className="fade-in" style={{ animation: 'fadeIn 0.4s ease-out' }}>
                 {renderContent()}
             </div>
         </div>

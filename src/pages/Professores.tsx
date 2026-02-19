@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, UserPlus } from 'lucide-react';
+import { Plus, Trash2, UserPlus, Mail, User, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 export const Professores = () => {
+    const { profile } = useAuth();
     const [teachers, setTeachers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -10,15 +12,20 @@ export const Professores = () => {
     const [newEmail, setNewEmail] = useState('');
 
     useEffect(() => {
-        fetchTeachers();
-    }, []);
+        if (profile?.school_id || profile?.role === 'super_admin') {
+            fetchTeachers();
+        }
+    }, [profile]);
 
     const fetchTeachers = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('teachers')
-            .select('*')
-            .order('name', { ascending: true });
+        let query = supabase.from('teachers').select('*').order('name', { ascending: true });
+
+        if (profile?.role !== 'super_admin' && profile?.school_id) {
+            query = query.eq('school_id', profile.school_id);
+        }
+
+        const { data, error } = await query;
 
         if (error) console.error(error);
         else setTeachers(data || []);
@@ -27,11 +34,15 @@ export const Professores = () => {
 
     const handleAddTeacher = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newName || !newEmail) return;
+        if (!newName || !newEmail || !profile?.school_id) return;
 
         const { error } = await supabase
             .from('teachers')
-            .insert([{ name: newName, email: newEmail }]);
+            .insert([{
+                name: newName,
+                email: newEmail,
+                school_id: profile.school_id
+            }]);
 
         if (error) {
             alert('Erro ao cadastrar professor: ' + error.message);
@@ -51,71 +62,90 @@ export const Professores = () => {
     };
 
     return (
-        <div>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1>Professores</h1>
+        <div style={{ padding: 'var(--spacing-xl)' }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2xl)' }}>
+                <div>
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: '800', marginBottom: 'var(--spacing-xs)' }}>
+                        Gestão de <span style={{ color: 'var(--primary)' }}>Professores</span>
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Cadastre e gerencie a equipe docente da sua escola</p>
+                </div>
                 <button
-                    className="btn-primary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    className={showForm ? 'btn btn-secondary' : 'btn btn-primary'}
                     onClick={() => setShowForm(!showForm)}
                 >
-                    <UserPlus size={20} /> {showForm ? 'Cancelar' : 'Cadastrar Professor'}
+                    {showForm ? 'Cancelar' : <><UserPlus size={20} /> Cadastrar Professor</>}
                 </button>
             </header>
 
             {showForm && (
-                <div className="glass" style={{ padding: '25px', marginBottom: '25px' }}>
-                    <form onSubmit={handleAddTeacher} style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: 'var(--text-muted)' }}>Nome Completo</label>
+                <div className="card" style={{ marginBottom: 'var(--spacing-xl)', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                    <form onSubmit={handleAddTeacher} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 'var(--spacing-lg)', alignItems: 'flex-end' }}>
+                        <div>
+                            <label><User size={14} style={{ marginRight: '6px' }} /> Nome Completo</label>
                             <input
                                 type="text"
-                                className="glass"
-                                style={{ width: '100%', padding: '10px', background: 'transparent' }}
+                                placeholder="Nome do docente"
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
                                 required
                             />
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: 'var(--text-muted)' }}>E-mail</label>
+                        <div>
+                            <label><Mail size={14} style={{ marginRight: '6px' }} /> E-mail Profissional</label>
                             <input
                                 type="email"
-                                className="glass"
-                                style={{ width: '100%', padding: '10px', background: 'transparent' }}
+                                placeholder="exemplo@escola.com"
                                 value={newEmail}
                                 onChange={(e) => setNewEmail(e.target.value)}
                                 required
                             />
                         </div>
-                        <button type="submit" className="btn-primary">Salvar</button>
+                        <button type="submit" className="btn btn-primary" style={{ padding: '10px 30px' }}>
+                            Salvar Professor
+                        </button>
                     </form>
                 </div>
             )}
 
-            <div className="glass">
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ background: 'rgba(0,0,0,0.05)', borderBottom: '1px solid var(--border)' }}>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>Nome</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>E-mail</th>
-                            <th style={{ padding: '15px', textAlign: 'right' }}>Ações</th>
+                        <tr style={{ background: 'var(--bg-main)', borderBottom: '1px solid var(--border)' }}>
+                            <th style={{ padding: '1.25rem', textAlign: 'left', fontWeight: '600', color: 'var(--text-muted)', fontSize: '0.875rem' }}>DOCENTE</th>
+                            <th style={{ padding: '1.25rem', textAlign: 'left', fontWeight: '600', color: 'var(--text-muted)', fontSize: '0.875rem' }}>CONTATO</th>
+                            <th style={{ padding: '1.25rem', textAlign: 'right', fontWeight: '600', color: 'var(--text-muted)', fontSize: '0.875rem' }}>AÇÕES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan={3} style={{ padding: '20px', textAlign: 'center' }}>Carregando...</td></tr>
+                            <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Carregando professores...</td></tr>
                         ) : teachers.length === 0 ? (
-                            <tr><td colSpan={3} style={{ padding: '20px', textAlign: 'center' }}>Nenhum professor cadastrado.</td></tr>
+                            <tr>
+                                <td colSpan={3} style={{ padding: '5rem 2rem', textAlign: 'center' }}>
+                                    <div style={{ opacity: 0.5, marginBottom: '1rem' }}><ShieldCheck size={48} style={{ margin: '0 auto' }} /></div>
+                                    <p style={{ fontSize: '1.125rem', fontWeight: '500' }}>Nenhum professor cadastrado</p>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Comece adicionando o primeiro professor da escola</p>
+                                </td>
+                            </tr>
                         ) : (
                             teachers.map(t => (
-                                <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '15px' }}>{t.name}</td>
-                                    <td style={{ padding: '15px' }}>{t.email}</td>
-                                    <td style={{ padding: '15px', textAlign: 'right' }}>
+                                <tr key={t.id} style={{ borderBottom: '1px solid var(--border)', transition: 'var(--transition)' }} className="table-row-hover">
+                                    <td style={{ padding: '1.25rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ width: '40px', height: '40px', background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700' }}>
+                                                {t.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{t.name}</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '1.25rem', color: 'var(--text-secondary)' }}>{t.email}</td>
+                                    <td style={{ padding: '1.25rem', textAlign: 'right' }}>
                                         <button
                                             onClick={() => handleDelete(t.id)}
-                                            style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}
+                                            style={{ padding: '8px', background: 'transparent', color: '#ef4444', opacity: 0.7, transition: 'all 0.2s' }}
+                                            onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+                                            onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
                                         >
                                             <Trash2 size={18} />
                                         </button>
@@ -129,3 +159,4 @@ export const Professores = () => {
         </div>
     );
 };
+
